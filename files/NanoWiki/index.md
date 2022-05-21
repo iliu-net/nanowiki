@@ -34,6 +34,6 @@ See [[NanoWiki/setup.md|Setup]] for instructions and check the
 
 
 <p style="text-align: center">
- <img src="$config.app_url$/static/picowiki-icon.png" style="height:125px;width:125px">
+ <img src="$config.app_url$/static/nanowiki-logo.png" style="height:125px;width:125px">
 </p>
 

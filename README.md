@@ -1,4 +1,4 @@
-# <img src="static/picowiki-favicon.png" alt=""> NanoWiki
+# <img src="static/nanowiki-favicon.png" alt=""> NanoWiki
 
 **_NanoWiki is a small and simple file-based Wiki system_**
 **_based on [PicoWiki](https://github.com/luckyshot/picowiki)_**
@@ -13,11 +13,11 @@
 - **File-based** Easily editable
 - **Extensible** evets via Plugins
 
-## Setup
+# Setup
 
 See [Setup](files/NanoWiki/setup.md) for instructions.
 
-## Plugins
+# Plugins
 
 Plugins are used to implement event hooks and media handlers.
 
@@ -29,7 +29,7 @@ find available plugins.
 To disable a plugin, simply move it away from the `plugins` folder
 (i.e. in a subfolder such as `plugins/deactivated`).
 
-### Hooks
+## Hooks
 
 - `plugins_loaded`: Plugins loaded
 - `run_init`: Initialized `run()` method
@@ -39,7 +39,7 @@ To disable a plugin, simply move it away from the `plugins` folder
 - `view_after`: The file view has been loaded, just before echoing it
 - `template_footer`: Add HTML code before the closing `</body>` HTML tag
 
-### Deprecated hooks
+## Deprecated hooks
 
 These hooks are deprecated because I don't think they can be hooked by
 plugins at all.
@@ -47,7 +47,7 @@ plugins at all.
 - `init`: Initialized the PicoWiki Class, just before loading `$config`
 - `config_loaded`: Configuration loaded
 
-### Additional hooks
+## Additional hooks
 
 - `error404`: File not found
 - `view_before`: The file view before being processed by the renderer
@@ -61,22 +61,22 @@ plugins at all.
 - `payload_post`: post-process payload before saving
 
 
-## Requirements
+# Requirements
 
 - PHP 7.4.0 or above
 - svgbob : line-art
 - graphviz : code diag
 
-### PHP Extensions
+## PHP Extensions
 
 - fileinfo
 - pecl-yaml
 - dom
 - json
 
-## Included Plugins
+# Included Plugins
 
-### PluginMarkDown
+## PluginMarkDown
 
 - Uses [MirrorMark](https://github.com/musicbed/mirrormark) for editing.
 - Markdown Extensions:
@@ -110,7 +110,7 @@ plugins at all.
   - syntax highlighting with tags in fenced code blocks using
     [hihglight.js](https://highlightjs.org/).
 
-### PluginHTML
+## PluginHTML
 
 This plugin is used to handle HTML files.  Implements a media handler
 interface.
@@ -142,7 +142,7 @@ other hand, the content of the `<meta>` is URL encoded at least for the
 `%` (`%25`) and `"` (`%22`) characters.
 
 
-### PluginIncludes
+## PluginIncludes
 
 This plugin can be used to include files into a document before
 rendering.
@@ -150,7 +150,7 @@ rendering.
 In a new line use: `$include: file $` to include a file.  Note that
 all files are relative to `config[file_path]`.
 
-### PluginVars
+## PluginVars
 
 This plugin is used to create text substituions.  There are two
 sets of substitutions.  Substitutions done **before**
@@ -166,7 +166,7 @@ and **after** rendering.
   - `$ attachments$` an unordered HTML list containg links to
     the current document's attachments.
 
-### PluginWikiLinks
+## PluginWikiLinks
 
 Simplified markup for internal links.  It supports:
 
@@ -185,9 +185,70 @@ Simplified markup for internal links.  It supports:
     __url-path__.
   - `}}` : closing
 
-### PluginEmoji
+## PluginEmoji
 
 Simple plugin to add Emoji rendering.
+
+# Themes
+
+Themes can be selected from config.yaml:
+
+```
+theme: dark
+```
+
+Currently an example `dark` theme is included for demostration only.
+It is not really usable.
+
+## Creating themes
+
+Create a directory in `static/themes`.  In there place the `css`
+and `js` as needed.
+
+There is always a `css` that can be included named:
+
+- `static/themes/<theme-name>/<theme-name>.css`
+
+In addition to that, `css` and `js` files can be overriden.  Use the
+following command to see what can be overrided:
+
+- `find . '(' -name '*.css' -o -name '*.js' ')'`
+
+Place the files you want to override with suitable copies in the `theme`
+directory with the following conventions.
+
+For files in the main `static` directory place them in one of these:
+
+- `>theme-dir>`/`<js|css>`/`<file>`
+- `<theme-dir>`/`<file>`
+
+For example, `style.css` in `dark` theme:
+
+- `static/themes/dark/style.css` or
+- `static/themes/dark/css/style.css` or
+
+Files in sub-directories of `static`:
+
+- `<theme-dir>`/`<js|css>`/`<flat-dir>`-`<file>`
+- `<theme-dir>`/`<flat-dir>`-`<file>`
+
+Where the `flat-dir` is the directory name within static with any
+slashes (`/`) switches for dashes (`-`).
+For example, `mirrormark/css/demo.css` in `dark` theme:
+
+- `static/themes/dark/mirrormark-demo.css` or
+- `static/themes/dark/css/mirrormark-demo.css`
+
+For files used in plugins:
+
+- `<theme-dir>`/`<plugin-name>`/`<js|css>`/`<file>`
+- `<theme-dir>`/`<plugin-name>`/`<file>`
+
+For example, `backend/plugins/PluginMarkDown/js/source.js` in
+the `dark` theme:
+
+- `static/themes/dark/PluginMarkDown/js/source.js` or
+- `static/themes/dark/PluginMarkDown/source.js`
 
 ## License & Contact
 

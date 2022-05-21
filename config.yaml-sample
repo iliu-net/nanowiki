@@ -1,2 +1,9 @@
-app_name: NanoWiki
-app_url: null
+# app_name:	NanoWiki
+# title:	NanoWiki
+# app_url: would normally be auto detected
+# file_path:	defaults to __DIR__/files NO trailing slash
+# default_doc:	index.md
+# copyright:	nobody@nowhere
+# read_only:	false|true|not-auth
+# nanowiki_url:	https://github.com/iliu-net/nanowiki
+# theme:	null

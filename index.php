@@ -7,12 +7,14 @@ $config = [
   'default_doc'		=> 'index.md',
   'copyright'		=> 'nobody@nowhere',
   'read_only'		=> false,
+  'nanowiki_url'	=> 'https://github.com/iliu-net/nanowiki',
+  'theme'		=> null,
 ];
 if (file_exists(__DIR__.'/config.yaml')) {
   $config = array_merge($config, yaml_parse_file(__DIR__.'/config.yaml'));
 }
 
-class PicoWiki
+class NanoWiki
 {
     public $config = null; // configuration variables
     public $file_list = []; // array of available files
@@ -571,7 +573,88 @@ class PicoWiki
     public function handler($ext, $callback) {
       $this->handlers[$ext] = $callback;
     }
+    /* Adding theme support */
+    protected function themeDir() {
+      if (is_dir($this->config['theme'])) {
+	$theme_dir = $this->config['theme'];
+      } elseif (is_dir('static/themes/'.$this->config['theme'])) {
+	$theme_dir = 'static/themes/'.$this->config['theme'];
+      } elseif (is_dir('static/'.$this->config['theme'])) {
+	$theme_dir = 'static/'.$this->config['theme'];
+      } else {
+	// Theme not found!
+	return null;
+      }
+      return str_replace(__DIR__.'/','',$theme_dir);
+    }
+
+    protected function themeFile($path) {
+      $path = str_replace(__DIR__.'/','',$path);
+      if (empty($this->config['theme'])) return $path;
+      $theme_dir = $this->themeDir();
+      if (empty($theme_dir)) return $path;
+
+      # "<p>theme_dir: $theme_dir</p>";
+      # "<p>path: $path</p>";
+
+      $src = '/'.$path;
+      $src = str_replace('/js/','/',$src);
+      $src = str_replace('/css/','/',$src);
+      $src = str_replace('/static/','/',$src);
+      $src = str_replace('/backend/plugins/','/',$src);
+      $src= ltrim($src,'/');
+      # "<p>src: $src</p>";
+
+      $pp = pathinfo($src);
+      $subs = [];
+      if (isset($pp['extension'])) $subs[] = '/'.$pp['extension'].'/';
+      $subs[] = '/';
+      $pkg = str_replace('/','-',$pp['dirname']);
+
+      foreach ($subs as $sd) {
+	if ($pkg == '.') {
+	  if (file_exists($theme_dir.$sd.$pp['basename']))
+	    return $theme_dir.$sd.$pp['basename'];
+	} else {
+	  if (file_exists($theme_dir.'/'.$pkg.$sd.$pp['basename']))
+	    return $theme_dir.'/'.$pkg.$sd.$pp['basename'];
+	  if (file_exists($theme_dir.$sd.$pkg.'-'.$pp['basename']))
+	    return $theme_dir.'/'.$pkg.$sd.$pp['basename'];
+	}
+      }
+      # '<p>'.__FILE__.','.__LINE__.':</p>';
+      return $path;
+    }
+    public function css($path,$use_link=true) {
+      $path = $this->themeFile($path);
+      if ($use_link && explode('/',$path,2)[0] == 'static') {
+	// Can be included
+	return '<link rel="stylesheet" href="'.$this->mkUrl($path).'">'.PHP_EOL;
+      }
+      return '<style>'.PHP_EOL.
+	      file_get_contents($path).PHP_EOL.
+	      '</style>'.PHP_EOL;
+    }
+    public function jsCode($path) {
+      $path = $this->themeFile($path);
+      if (explode('/',$path,2)[0] == 'static') {
+	// If begins wiht static we can include them...
+	return '<script src="'.$this->mkUrl($path).'"></script>'.PHP_EOL;
+      }
+      // Must embed the javascript inside
+      return '<script>'.PHP_EOL.
+	      file_get_contents($path).PHP_EOL.
+	      '</script>'.PHP_EOL;
+    }
+    public function themeCss() {
+      if (empty($this->config['theme'])) return;
+      $theme_dir = $this->themeDir();
+      if (empty($theme_dir)) return;
+      $css = $theme_dir.'/'.$this->config['theme'].'.css';
+      if (!file_exists($css)) return;
+      return '<link rel="stylesheet" href="'.$this->mkUrl($css).'">'.PHP_EOL;
+    }
 }
 
-$PicoWiki = new PicoWiki($config);
+$PicoWiki = new NanoWiki($config);
 $PicoWiki->run(@$_GET['url']);

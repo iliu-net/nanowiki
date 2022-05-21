@@ -14,7 +14,7 @@ title: CHANGES
   - Directory handler
   - Default handler with download resume support and file uploads.
 - Meta data handling
-- Minor optimizations
 - New and deprecated event hooks
 - Added read-only and read|write control hooks
 - All plugins re-worked
+- theme support

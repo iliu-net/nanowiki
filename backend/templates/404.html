@@ -9,36 +9,24 @@
   ?>
 </head>
 <body>
+  <?php include($PicoWiki->config['app_dir'].'/backend/templates/_header.html'); ?>
 
   <div id="main" class="main">
-    <h1>File Not Found</h1>
+    <h2>File Not Found</h2>
     <p>Go <a href="<?= $PicoWiki->mkUrl()?>">Home</a></p>
-    <hr>
-    <p>
-      Do you want to upload a new file?
-    </p>
-    <form method="post" enctype="multipart/form-data" action="<?=$upload_path?>">
-      <p>Select file to upload:</p>
-      <p><input type="file" name="fileToUpload" id="fileToUpload"></p>
-      <p><input type="submit" value="Upload File" name="attach"></p>
+    <?php if ($PicoWiki->isWritable($file_path)) { ?>
+      <hr>
+      <p>
+	Do you want to upload a new file?
       </p>
-      <input type="hidden" name="action" value="attach">
-    </form>
-    <table>
-      <tr>
-	<th align="left">URL</th>
-	<td><?= $this->url ?></td>
-      </tr>
-      <tr>
-	<th align="left">file_path</th>
-	<td><?= $file_path ?></td>
-      </tr>
-    </table>
-    <pre>
-      <?php print_r($PicoWiki->file_list); ?>
-      <?php print_r($PicoWiki->config); ?>
-      URL: <?= $PicoWiki->url ?>
-    </pre>
+      <form method="post" enctype="multipart/form-data" action="<?=$upload_path?>">
+	<p>Select file to upload:</p>
+	<p><input type="file" name="fileToUpload" id="fileToUpload"></p>
+	<p><input type="submit" value="Upload File" name="attach"></p>
+	</p>
+	<input type="hidden" name="action" value="attach">
+      </form>
+    <?php } ?>
   </div>
 
   <?php include($PicoWiki->config['app_dir'].'/backend/templates/_footer.html'); ?>

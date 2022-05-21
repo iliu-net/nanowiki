@@ -1,21 +1,3 @@
-/*
-textarea1 = mirrorMark(document.getElementById("srcedit"), {
-  showToolbar: true
-});
-textarea1.registerActions({
-  "save": function() {
-    var txt = textarea1.cm.getDoc().getValue();
-  }
-});
-textarea1.registerTools([
-  { name: "save", action: "save" }
-]);
-textarea1.registerKeyMaps({ "Cmd-S": "save" });
-
-
-textarea1.render();
-
-*/
 textarea1 = CodeMirror.fromTextArea(document.getElementById("srcedit"), {
     lineNumbers: true,
     mode: "htmlmixed"
@@ -25,19 +7,46 @@ function cm_save() {
   document.getElementById("payload").value = txt;
   document.getElementById("edform").submit();
 }
-document.getElementById("source").style.display = "none";
 
-function toggle_element(id) {
-  var x = document.getElementById(id)
-  if (x.style.display === "none") {
-    x.style.display = "block";
-  } else {
-    x.style.display = "none";
-  }
-}
+//~ document.getElementById("source").style.display = "none";
 
-function toggle_source() {
-  toggle_element("source");
-  toggle_element("main");
-}
+//~ function toggle_element(id) {
+  //~ var x = document.getElementById(id)
+  //~ if (x.style.display === "none") {
+    //~ x.style.display = "block";
+  //~ } else {
+    //~ x.style.display = "none";
+  //~ }
+//~ }
 
+//~ function toggle_source() {
+  //~ toggle_element("source");
+  //~ toggle_element("main");
+//~ }
+
+tb_display("tb-tools-show-source","inline");
+tb_display("tb-tools-show-content","none");
+tb_display("tb-tools-save","none");
+tb_display("source","none");
+
+tb_hook("tb-tools-show-source", function() {
+  tb_display("tb-tools-show-source","none");
+  tb_display("tb-tools-show-content","inline");
+  tb_display("tb-tools-save","inline");
+
+  tb_display("source", "block");
+  tb_display("main", "none");
+});
+
+tb_hook("tb-tools-show-content", function() {
+  tb_display("tb-tools-show-source","inline");
+  tb_display("tb-tools-show-content","none");
+  tb_display("tb-tools-save","none");
+
+  tb_display("source", "none");
+  tb_display("main", "block");
+});
+
+tb_hook("tb-tools-save", function() {
+  cm_save();
+});

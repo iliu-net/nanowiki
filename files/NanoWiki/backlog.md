@@ -5,15 +5,38 @@ tags: development, php
 
 [toc]
 
+- [x] upload and save actions must have isWriteable checks.
 
-## Navigation
+
+# Navigation
 
 - nav
   - home
   - file-list | all-files list
+    [home] / bread crumbs
+    [switch view]
+    - folders
+    - folders
+    - files
+    - files
+
+    [home] | [switch view]
+    - ...
+
+    [folder] or [file] icons.
+
   - tag-cloud [all files|current context]
   - search-text [allfiles|current context]
   - recent
+
+top part of file list
+- [ .... ] : list of links (add class to make it left or right)
+- [s] [____search____] [x]
+- file list
+
+
+
+
 - actions
   - view source
   - attach file
@@ -32,6 +55,7 @@ tags: development, php
 - COOKIE contains the search|select settings
 - GET queries are used to modify the cookie
 - tags: GET to add or remove tags from the selection cookie
+
 - normal view: only files in the current directory
   - if current file <path>/article.md
   - nav list view:
@@ -40,9 +64,8 @@ tags: development, php
     - list of files under <path>
     - if <path>/article is a directory, show an attachments link
 
-- Can the default handler make a plugin?
 
-## Markdown text diagrams
+# Markdown text diagrams
 
 - blockdiag
   - http://blockdiag.com/en/
@@ -57,7 +80,7 @@ tags: development, php
 - update container config
 
 
-## new media types
+# new media types
 
 - source code
   - only view source in codemirror
@@ -66,7 +89,7 @@ tags: development, php
 - directory handler
   - delete, rename, move files
 
-## others
+# others
 
 - user authentication
   - https://www.devdungeon.com/content/http-basic-authentication-php
@@ -89,5 +112,6 @@ tags: development, php
   - tag from git
 - Report for checking for broken links (links to pages that don't exist yet), Orphan pages, etc.
 - Code snippets to load YouTube videos or Google Maps, etc.
-- Themes
 - Sitemap generator
+- reverse proxy support
+- create a dark theme

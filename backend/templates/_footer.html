@@ -19,3 +19,20 @@
     Copyright &copy; <?=$PicoWiki->meta['year']?> <?=$PicoWiki->config['copyright']?> <br/>
     All rights reserved<br/>
 </small>
+<?php if (!empty($_GET['debug'])) { ?>
+URL: <?= $PicoWiki->url ?><br/>
+<pre>
+Meta:
+<?php print_r($PicoWiki->meta) ?>
+
+Cookies:
+<?php print_r($_COOKIE); ?>
+
+Server:
+<?php print_r($_SERVER); ?>
+
+Context:
+<?php print_r($PicoWiki->context); ?>
+</pre>
+<?php } ?>
+

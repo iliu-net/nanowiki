@@ -1,28 +1,17 @@
 textarea1 = CodeMirror.fromTextArea(document.getElementById("srcedit"), {
     lineNumbers: true,
-    mode: "htmlmixed"
+    mode: "htmlmixed",
+    extraKeys: {
+      "Ctrl-S": function(instance) {
+	cm_save();
+      }
+    }
   });
 function cm_save() {
   var txt = textarea1.getDoc().getValue();
   document.getElementById("payload").value = txt;
   document.getElementById("edform").submit();
 }
-
-//~ document.getElementById("source").style.display = "none";
-
-//~ function toggle_element(id) {
-  //~ var x = document.getElementById(id)
-  //~ if (x.style.display === "none") {
-    //~ x.style.display = "block";
-  //~ } else {
-    //~ x.style.display = "none";
-  //~ }
-//~ }
-
-//~ function toggle_source() {
-  //~ toggle_element("source");
-  //~ toggle_element("main");
-//~ }
 
 tb_display("tb-tools-show-source","inline");
 tb_display("tb-tools-show-content","none");

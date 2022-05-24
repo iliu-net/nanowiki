@@ -1,49 +1,7 @@
 <!-- body header -->
 <div class="topbar">
   <div class="topbar-nav-container">
-    <a href="<?=$PicoWiki->config['nanowiki_url']?>" target="_blank" class="topbar-logo" title="NanoWiki github page" alt="NanoWiki github page">
-      <img src="<?=$PicoWiki->mkUrl('static/nanowiki-favicon.png')?>" height=24 width=24>
-    </a>
-  </div>
-  <div class="topbar-nav-container">
-    <!-- <button id="tb-nav-file-toggle1"> &#x1F4C1; File </button> -->
-    <div class="dropdown">
-      <a href="javascript:;" id="tb-nav-file-toggle" class="dropbtn" title="File list" alt="File list"> &#x1F4C1; Files </a>
-      <!-- global|local list -->
-      <div id="tb-nav-file-list" class="dropdown-content">
-	<div class="dropdown-topbar">
-	  <a href="<?=$PicoWiki->mkUrl()?>">&#x2302; Home </a>
-	  <!--
-		    <a href="<?=$PicoWiki->mkUrl()?>" class="dropdown-topbar-right">&#x25CE; Local </a>
-		    <br>
-		    [S] Search bar ... [x]
-	  -->
-	  <hr>
-	</div>
-	<ul>
-	  <?php foreach( $PicoWiki->file_list as $file ){ ?>
-	      <li><a href="<?=$PicoWiki->mkUrl($file)?>"><?=$file?></a></li>
-	  <?php } ?>
-
-	  <?php foreach( $PicoWiki->file_list as $file ){ ?>
-	      <li><a href="<?=$PicoWiki->mkUrl($file)?>"><?=$file?></a></li>
-	  <?php } ?>
-	</ul>
-      </div>
-    </div>
-    <a href="javascript:;" id="tb-nav-search-toggle" class="topbar-default-hidden" title="Full text search" alt="Full text search"> &#x1F50E; Search </a>
-    <a href="javascript:;" id="tb-nav-tag-toggle" class="topbar-default-hidden" title="Tag cloud" alt="Tag cloud"> &#x1F3F7; Tags </a>
-  </div>
-  <div class="topbar-tools-container">
-    <a href="javascript:;" id="tb-tools-save" class="topbar-default-hidden" title="Save document" alt="Save document"> &#x1F4BE; save </a>
-    <a href="javascript:;" id="tb-tools-show-source" class="topbar-default-hidden" title="Show source" alt="Show source"> &#x1F6C8; source </a>
-    <a href="javascript:;" id="tb-tools-show-content" class="topbar-default-hidden" title="Display content" alt="Display content"> &#x1F441; view </a>
-    <a href="javascript:;" id="tb-tools-attach-toggle" class="topbar-default-hidden" title="Upload file attachment" alt="Upload file attachment"> &#x1F4CE; attach </a>
-    <a href="javascript:;" id="tb-tools-goto-toggle" class="topbar-default-hidden" title="Go to existing or create new document" alt="Go to existing or create new document"> &#x2386; goto </a>
-    <a href="javascript:;" id="tb-tools-menu-toggle" class="topbar-default-hidden" title="Tools menu" alt="Tools menu"> &#x2699; tools </a>
-       <!-- delete -->
-       <!-- rename -->
-       <!-- move -->
+    <?= $PicoWiki->renderTools() ?>
   </div>
 </div>
 <div class="topbar-spacer">&nbsp;</div>
@@ -51,4 +9,4 @@
 <h1><?= htmlspecialchars($PicoWiki->meta['title']) ?></h1>
 </div>
 <hr/>
-<script src="<?= $PicoWiki->mkUrl('static/topbar.js')?>"></script>
+<?=$PicoWiki->jsCode('static/topbar.js')?>

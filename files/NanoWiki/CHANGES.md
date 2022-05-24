@@ -18,3 +18,11 @@ title: CHANGES
 - Added read-only and read|write control hooks
 - All plugins re-worked
 - theme support
+
+***
+
+- navigation improvements with file list modes: global (all files)
+  or local (only current directory)
+- cookie support to let the user remember how they were doing things
+- search filenames and full text searches
+

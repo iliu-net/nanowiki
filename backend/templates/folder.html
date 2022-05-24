@@ -12,12 +12,27 @@
 	echo '<p>Empty folder!</p>';
       } else {
 	echo '<p>Folder contents</p>';
-	echo '<ul>';
+	echo '<ul>'.PHP_EOL;
 	foreach ($lst as $fn) {
 	  echo '<li>'.
-	      '<a href="'.$PicoWiki->mkUrl($PicoWiki->url,$fn).'">'.
-	      htmlspecialchars($fn).
-	      '</a></li>';
+		'<a href="'.$PicoWiki->mkUrl($PicoWiki->url,$fn).'">'.
+		htmlspecialchars($fn).
+		'</a>'.PHP_EOL;
+	  if ($PicoWiki->isWritable($PicoWiki->getFilePath($PicoWiki->url.'/'.$fn))) {
+	    echo '<a href="'.$PicoWiki->mkUrl($PicoWiki->url,$fn).'?do=delete"'.
+		' title="Delete document" alt="Delete document"'.
+		' onclick="return confirm('."'".'Delete '.$fn.'?'."'".');"'.
+		'>'.
+		'<img src="'.$PicoWiki->mkUrl('static/delete.png').'" height=16 width=16>'.
+		'</a>'.PHP_EOL;
+	    echo  '<a href="'.$PicoWiki->mkUrl($PicoWiki->url,$fn).'?do=rename"'.
+		' title="Rename document" alt="Rename document"'.
+		' onclick="return tb_rename(this,'."'".$PicoWiki->url.'/'.$fn."'".')"'.
+		'>'.
+		'<img src="'.$PicoWiki->mkUrl('static/rename.png').'" height=16 width=16>'.
+		'</a>';
+	  }
+	  echo '</li>'.PHP_EOL;
 	}
 	echo '</ul>';
       }
@@ -29,11 +44,10 @@
     <p>
       Do you want to upload a new file?
     </p>
-    <form method="post" enctype="multipart/form-data" action="<?=$PicoWiki->url?>">
+    <form method="post" enctype="multipart/form-data" action="<?=$PicoWiki->mkUrl($PicoWiki->url)?>">
       <p>Select file to upload:</p>
       <p><input type="file" name="fileToUpload" id="fileToUpload"></p>
       <p><input type="submit" value="Upload File" name="attach"></p>
-      </p>
       <input type="hidden" name="action" value="attach">
     </form>
   </div>

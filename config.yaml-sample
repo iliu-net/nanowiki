@@ -7,3 +7,7 @@
 # read_only:	false|true|not-auth
 # nanowiki_url:	https://github.com/iliu-net/nanowiki
 # theme:	null
+# cookie_id:	NanoWiki
+# cookie_age:	2592000
+# codemirror:	https://cdn.jsdelivr.net/npm/codemirror@5.65.4/
+

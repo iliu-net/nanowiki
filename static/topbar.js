@@ -1,3 +1,5 @@
+
+
 /* When the user clicks on the button,
 toggle between hiding and showing the dropdown content */
 
@@ -31,7 +33,7 @@ function tb_enable_dropdown(tid, did) {
   }
 }
 tb_enable_dropdown("tb-nav-file-toggle", "tb-nav-file-list");
-
+tb_enable_dropdown("tb-nav-tools-toggle", "tb-nav-tools-dlg");
 
 // Close the dropdown menu if the user clicks outside of it
 window.onclick = function(event) {
@@ -83,3 +85,101 @@ function tb_toggle_tool(id) {
   }
 }
 
+/*****************************************************************/
+// Search functionality
+function sd_findFile(sid,lid) {
+  var sb = document.getElementById(sid);
+  if (sb == null) {
+    console.log("UNABLE TO FIND "+sid);
+    return;
+  }
+  var term = sb.value.toLowerCase();
+  var re = null;
+  try {
+    re = re = new RegExp(term);
+  } catch(e) {
+    //~ console.log(e);
+  }
+  //~ console.log("Search for "+term);
+
+  var ul = document.getElementById(lid);
+
+  var items = ul.getElementsByTagName("li");
+  for (var i = 0; i < items.length; ++i) {
+    // display:list-item|none
+    var a = items[i].getElementsByTagName('a');
+    if (a === null || a.length != 1) continue;
+    var text = a[0].innerHTML.toLowerCase();
+    if (re === null) {
+      found = text.indexOf(term);
+    } else {
+      found = text.search(re);
+    }
+    if (found != -1) {
+      // found it
+      items[i].style.display = "list-item";
+    } else {
+      items[i].style.display = "none";
+    }
+  }
+}
+function sd_hookSearchBox(sid,lid,xid) {
+  var sb = document.getElementById(sid);
+  if (sb == null) {
+    console.log("UNABLE TO FIND "+sid);
+    return;
+  }
+  sb.oninput = function() {
+    sd_findFile(sid,lid);
+  }
+  var xb = document.getElementById(xid);
+  xb.onclick = function() {
+    sb.value = "";
+    sd_findFile(sid,lid)
+  }
+}
+sd_hookSearchBox("tb-nav-file-list-searchbox","tb-nav-file-list","tb-nav-file-list-reset-search");
+function sd_hookSearchFullText(cid,fid) {
+  var cc = document.getElementById(cid);
+  if (cc == null) {
+    console.log("UNABLE TO FIND "+cid);
+    return;
+  }
+  var ff = document.getElementById(fid);
+  if (ff == null) {
+    console.log("UNABLE TO FIND "+fid);
+    return;
+  }
+  cc.onclick = function() {
+    ff.submit();
+  }
+}
+sd_hookSearchFullText("tb-nav-file-list-content-search","tb-nav-search-form");
+
+function td_hookAttachTool(cid,fid) {
+  var cc = document.getElementById(cid);
+  if (cc == null) {
+    console.log("UNABLE TO FIND "+cid);
+    return;
+  }
+  var ff = document.getElementById(fid);
+  if (ff == null) {
+    console.log("UNABLE TO FIND "+fid);
+    return;
+  }
+  cc.onclick = function() {
+    ff.submit();
+  }
+}
+td_hookAttachTool("tb-nav-tools-attach","tb-nav-tools-attach-frm");
+
+function tb_rename(obj,name) {
+  var input = prompt("Please enter a new name:",name);
+  if (input == null) return false;
+
+  obj.href = obj.href + '&name=' + encodeURI(input);
+  consoel.log(obj.href);
+  console.log(input);
+  console.log(obj);
+  return true;
+}

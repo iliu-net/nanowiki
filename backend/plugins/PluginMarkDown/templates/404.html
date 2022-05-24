@@ -2,9 +2,17 @@
 <html lang="en">
 <head>
   <?php include($PicoWiki->config['app_dir'].'/backend/templates/html_head.html'); ?>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-  <?=$PicoWiki->css('static/mirrormark/css/mirrormark.package.min.css')?>
-  <?=$PicoWiki->jsCode('static/mirrormark/js/mirrormark.package.min.js')?>
+
+  <script src="<?=$PicoWiki->config['codemirror']?>lib/codemirror.min.js"></script>
+  <link  href="<?=$PicoWiki->config['codemirror']?>lib/codemirror.min.css" rel="stylesheet">
+
+  <script src="<?=$PicoWiki->config['codemirror']?>addon/edit/continuelist.min.js"></script>
+  <script src="<?=$PicoWiki->config['codemirror']?>mode/xml/xml.min.js"></script>
+  <script src="<?=$PicoWiki->config['codemirror']?>mode/javascript/javascript.min.js"></script>
+  <script src="<?=$PicoWiki->config['codemirror']?>mode/markdown/markdown.min.js"></script>
+
+  <script src="<?=$PicoWiki->config['codemirror']?>mode/php/php.min.js"></script>
+
   <?=$PicoWiki->css($dir.'/css/style.css') ?>
 </head>
 <body>

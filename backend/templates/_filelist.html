@@ -1,0 +1,52 @@
+    <div class="dropdown">
+      <a href="javascript:;" id="tb-nav-file-toggle" class="dropbtn" title="File list" alt="File list"> &#x1F4C1; Files </a>
+      <!-- global|local list -->
+      <div id="tb-nav-file-list" class="dropdown-content">
+       <div class="dropdown-topbar">
+         <?php foreach ($PicoWiki->bread_crumbs as $bc) {
+           echo $PicoWiki->serveCrumb($bc);
+         } ?>
+         <br>
+           <form method="GET" id="tb-nav-search-form">
+             <a href="javascript:;" id="tb-nav-file-list-content-search" title="Full text search" alt="Full text search">&#x1F50E;</a>
+
+
+             <!-- a href="javascript:;" id="tb-nav-file-list-name-search" title="Toggle search mode" alt="Toggle search mode">&#x1F4C1;</a -->
+             <!-- a href="javascript:;" id="tb-nav-file-list-content-search" title="Toggle search mode" alt="Toggle search mode" class="topbar-default-hidden">&#x1F5CE;</a -->
+             <input type="text" id="tb-nav-file-list-searchbox" title="SEARCH" name="q">
+             <a href="javascript:;" id="tb-nav-file-list-reset-search">&cross;</a>
+             <!-- a href="javascript:;" id="tb-nav-file-list-run-search">&#x1F50E;</a -->
+           </form>
+         <?php
+         if (!empty($PicoWiki->context['q'])) {
+           echo '<br>';
+           echo '<a href="'.$PicoWiki->mkUrl($PicoWiki->url).'?q=" title="Clear search query">';
+           echo '"'. htmlspecialchars($PicoWiki->context['q']).'" ';
+           echo '<small>&cross;</small>';
+           echo '</a>';
+           echo '<small>';
+           $k = count($PicoWiki->file_list);
+           switch ($k) {
+           case 0:
+             echo 'No document matches';
+             break;
+           case 1:
+             echo 'One matching document';
+             break;
+           default:
+             echo "$k matching documents";
+           }
+           echo '</small>';
+         }
+         ?>
+         <hr>
+       </div>
+       <ul id="tb-nav-file-list">
+         <?php foreach( $PicoWiki->file_list as $file ) {
+           $fname = $PicoWiki->context['lstmode'] == 'local' ? basename($file) : $file;
+           ?>
+             <li><a href="<?=$PicoWiki->mkUrl($file)?>"><?=$fname?></a></li>
+         <?php } ?>
+       </ul>
+      </div>
+    </div>

@@ -1,6 +1,4 @@
-.mirrormark-toolbar .save a:before {
-  content: "\f0c7";
-}
-.mirrormark-toolbar li.save {
-  float: right;
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto;
 }

@@ -1,0 +1,37 @@
+    <div class="dropdown not-topbar-right">
+      <a href="javascript:;" id="tb-nav-tools-toggle" class="dropbtn" title="Tools menu" alt="Tools menu"> &#x2699; </a>
+      <div id="tb-nav-tools-dlg" class="dropdown-content">
+        <form method="GET" id="tb-nav-tools-go">
+          <input type="text" id="tb-nav-tools-goto" title="Page to jump to..." name="go">
+	  &#x2386;
+         </form>
+        <?php
+	  $fp = $PicoWiki->getFilePath($PicoWiki->url);
+	  if ($PicoWiki->isWritable($fp)) {
+	    ?>
+	    <form method="post" id="tb-nav-tools-attach-frm" enctype="multipart/form-data" action="<?=$PicoWiki->mkUrl($PicoWiki->url)?>">
+	      <input type="file" name="fileToUpload" id="fileToUpload">
+	      <a href="javascript:;" id="tb-nav-tools-attach" title="Attach file" alt="Attach file">&#x1F4CE;</a>
+	      <input type="hidden" name="action" value="attach">
+	    </form>
+
+	    <a href="<?=$PicoWiki->mkUrl($PicoWiki->url)?>?do=delete" id="tb-nav-tools-delete" title="Delete document" alt="Delete document"
+		onclick="return confirm('Are you sure you want to delete this document?')"
+	      >
+	      <img src="<?=$PicoWiki->mkUrl('static/delete.png')?>">
+	    </a>
+	    <a href="<?=$PicoWiki->mkUrl($PicoWiki->url)?>?do=rename" id="tb-nav-tools-rename" title="Rename document" alt="Rename document"
+		onclick="return tb_rename(this,'<?=$PicoWiki->url?>')"
+	      >
+	      <img src="<?=$PicoWiki->mkUrl('static/rename.png')?>">
+	    </a>
+
+<!--
+	  delete <br>
+	  rename <br>
+	  move <br>
+-->
+        <?php } ?>
+      </div>
+    </div>
+

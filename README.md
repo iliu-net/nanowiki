@@ -3,7 +3,7 @@
 **_NanoWiki is a small and simple file-based Wiki system_**
 **_based on [PicoWiki](https://github.com/luckyshot/picowiki)_**
 
-<p style="text-align: center"><img src="static/screenshot.jpg" alt="Screenshot of the main page of PicoWiki"></p>
+<p style="text-align: center"><img src="static/screenshot.png" alt="Screenshot of the main page of PicoWiki"></p>
 
 
 # Features
@@ -59,7 +59,8 @@ plugins at all.
 - `payload_pre`: pre-process payload before saving
 - `meta_write_before`: modify meta data before payload generation
 - `payload_post`: post-process payload before saving
-
+- `context_loaded`:
+- `crumbs_loaded`:
 
 # Requirements
 
@@ -78,7 +79,7 @@ plugins at all.
 
 ## PluginMarkDown
 
-- Uses [MirrorMark](https://github.com/musicbed/mirrormark) for editing.
+- Uses [CodeMirror](https://codemirror.net/) for editing.
 - Markdown Extensions:
   - checkboxes in lists [x] and [ ] markup
   - table span. [See markup](https://github.com/KENNYSOFT/parsedown-tablespan)

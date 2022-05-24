@@ -1,22 +1,17 @@
-function mm_save() {
-    var txt = textarea1.cm.getDoc().getValue();
-    document.getElementById("payload").value = txt;
-    document.getElementById("edform").submit();
+textarea1 = CodeMirror.fromTextArea(document.getElementById("srcedit"), {
+    lineNumbers: true,
+    mode: "markdown",
+    extraKeys: {
+      "Ctrl-S": function(instance) {
+	cm_save();
+      }
+    }
+  });
+function cm_save() {
+  var txt = textarea1.getDoc().getValue();
+  document.getElementById("payload").value = txt;
+  document.getElementById("edform").submit();
 }
-
-textarea1 = mirrorMark(document.getElementById("srcedit"), {
-  showToolbar: true
-});
-textarea1.registerActions({
-  "save": function() {
-    mm_save();
-  }
-});
-textarea1.registerTools([
-  { name: "save", action: "save" }
-]);
-textarea1.registerKeyMaps({ "Cmd-S": "save" });
-textarea1.render();
 
 tb_display("tb-tools-show-source","inline");
 tb_display("tb-tools-show-content","none");
@@ -42,22 +37,6 @@ tb_hook("tb-tools-show-content", function() {
 });
 
 tb_hook("tb-tools-save", function() {
-  mm_save();
+  cm_save();
 });
 
-
-//~ document.getElementById("source").style.display = "none";
-
-//~ function toggle_element(id) {
-  //~ var x = document.getElementById(id)
-  //~ if (x.style.display === "none") {
-    //~ x.style.display = "block";
-  //~ } else {
-    //~ x.style.display = "none";
-  //~ }
-//~ }
-
-//~ function toggle_source() {
-  //~ toggle_element("source");
-  //~ toggle_element("main");
-//~ }

@@ -31,6 +31,7 @@
 .topbar-nav-container {
     float: left;
     padding: 10px;
+    width: 100%;
 }
 .topbar-tools-container {
     float: right;
@@ -40,6 +41,11 @@
 .topbar-default-hidden {
   display:none;
 }
+
+.topbar-right {
+  float:right;
+}
+
 
 /*****************************************************************/
  /* Dropdown Button */

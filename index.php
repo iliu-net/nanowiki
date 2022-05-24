@@ -9,6 +9,9 @@ $config = [
   'read_only'		=> false,
   'nanowiki_url'	=> 'https://github.com/iliu-net/nanowiki',
   'theme'		=> null,
+  'cookie_id'		=> 'NanoWiki',
+  'cookie_age'		=> 86400 * 30,
+  'codemirror'		=> 'https://cdn.jsdelivr.net/npm/codemirror@5.65.4/',
 ];
 if (file_exists(__DIR__.'/config.yaml')) {
   $config = array_merge($config, yaml_parse_file(__DIR__.'/config.yaml'));
@@ -17,7 +20,9 @@ if (file_exists(__DIR__.'/config.yaml')) {
 class NanoWiki
 {
     public $config = null; // configuration variables
+    public $context = null; // context for file_list and bread_crumbs
     public $file_list = []; // array of available files
+    public $bread_crumbs = []; // array of breadcrumbs
     public $plugin_list = [];
     public $handlers = []; // media handlers (based on file extension)
     public $url = null;
@@ -25,6 +30,8 @@ class NanoWiki
     public $source = null;
     public $events = [];
     public $meta = [];	// current doc meta data
+    public $https = false;
+    public $toolbar = []; // Toolbar items
 
     /**
      * Converts a long string of bytes into a readable format e.g KB, MB, GB, TB, YB
@@ -59,7 +66,11 @@ class NanoWiki
 	  if (basename($file_path) == $this->config['default_doc']) {
 	    $meta['title'] = $this->url;
 	  } else {
-	    $meta['title'] = $pi['filename'];
+	    if (empty($this->url)) {
+	      $meta['title'] = $this->config['app_name'];
+	    } else {
+	      $meta['title'] = $pi['filename'];
+	    }
 	  }
 	}
 
@@ -157,29 +168,16 @@ class NanoWiki
 
     /* These two functions are stubs for the moment... */
     public function isWritable($filepath) {
+      //~ return false;
       if (empty($this->config['read_only'])) {
 	$wr = true;
       } else {
-	if (is_bool($this->config['read_only'])) {
-	  $wr = !$this->config['read_only'];
-	} else if (is_string($this->config['read_only'])) {
-	  $wr = strtolower($this->config['read_only']);
-	  switch($wr) {
-	  case 'not-auth':
-	    # TODO: check how auth user is received
-	    # $_SERVER['PHP_AUTH_USER'] or REMOTE_USER
-	    $wr = true;
-	    break;
-	  case 'no':
-	  case 'false':
-	  case 'n':
-	    $wr = true;
-	    break;
-	  default:
-	    $wr = !(bool)$wr;
-	  }
+	if ($this->config['read_only'] == 'not-auth') {
+	  # TODO: check how auth user is received
+	  # $_SERVER['PHP_AUTH_USER'] or REMOTE_USER
+	  $wr = true;
 	} else {
-	  $wr = !(bool)$this->config['read_only'];
+	  $wr = !filter_var($this->config['read_only'],FILTER_VALIDATE_BOOLEAN);
 	}
       }
       return $this->event('check_writeable', $wr);
@@ -202,10 +200,52 @@ class NanoWiki
       $this->url = self::sanitize($url);
       $this->event('url_loaded', $this);
 
-      $this->file_list = $this->listFiles($this->config['file_path']);
+      $this->checkContext();
+      $this->event('context_loaded', $this);
+
+      if (!empty($_GET['go'])) {
+	if ($_GET['go'][0] == '/') {
+	  header('Location: '.$this->mkUrl($_GET['go']));
+	} else {
+	  if (is_dir($this->config['file_path'].'/'.$this->url)) {
+	    header('Location: '.$this->mkUrl($this->url,$_GET['go']));
+	  } else {
+	    header('Location: '.$this->mkUrl(dirname($this->url),$_GET['go']));
+	  }
+	}
+	exit;
+      }
+
+      $this->listFiles();
       $this->event('list_loaded', $this);
+      $this->bakeCrumbs();
+      $this->event('crumbs_loaded', $this);
+
+      $this->loadTools();
+      $this->event('tools_loaded', $this);
 
       $file_path = $this->getFilePath($this->url);
+
+      if(isset($_GET['do'])) {
+	if ($_GET['do'] == 'delete') {
+	  if (!$this->isWritable($file_path)) {
+	    $this->event('write_access_error',$this);
+	    die("Write access: $file_path"); #TODO:
+	  } else {
+	    $this->delete($file_path);
+	    exit;
+	  }
+	} elseif ($_GET['do'] == 'rename' && !empty($_GET['name'])) {
+	  if (!$this->isWritable($file_path)) {
+	    $this->event('write_access_error',$this);
+	    die("Write access: $file_path"); #TODO:
+	  } else {
+	    $this->rename($file_path,$_GET['name']);
+	    exit;
+	  }
+	}
+      }
+
       if (count($_POST)) {
 	if (!$this->isWritable($file_path)) {
 	  $this->event('write_access_error',$this);
@@ -225,6 +265,86 @@ class NanoWiki
 	}
 	$this->view($file_path);
       }
+    }
+
+    #
+    # These function
+    protected function checkContext() {
+      $cookie_name = $this->config['cookie_id'].'_context';
+      if (isset($_COOKIE[$cookie_name])) {
+	parse_str($_COOKIE[$cookie_name],$context);
+      } else {
+	$context = [];
+      }
+      $set_cookie = false;
+
+      if (empty($context['timestamp'])) $context['timestamp'] = 1;
+
+      if (empty($context['lstmode'])) $context['lstmode'] = 'global';
+      if (isset($_GET['sw_lstmode'])) {
+	$m = strtolower($_GET['sw_lstmode']);
+	if (in_array($m,['local','global'])) {
+	  if ($m != $context['lstmode']) {
+	    $context['lstmode'] = $m;
+	    $set_cookie = true;
+	  }
+	}
+      }
+
+      if (isset($_GET['q'])) {
+	$q = strtolower($_GET['q']);
+	if (!isset($context['q']) || $q != $context['q']) {
+	  $context['q'] = $q;
+	  $set_cookie = true;
+	  if (empty($context['q'])) unset($context['q']);
+	}
+      }
+
+      if ($set_cookie || time()-$context['timestamp'] > $this->config['cookie_age']/2) {
+	$context['timestamp'] = time();
+	setcookie($cookie_name,http_build_query($context), [
+	  'expires' => time() + $this->config['cookie_age'],
+	  'path' => dirname($_SERVER['SCRIPT_NAME']),
+	  'secure' => $this->https,
+	  'httponly' => true,
+	  'samesite' => 'Lax',
+	]);
+      }
+      $this->context = $context;
+    }
+
+    protected function delete($file_path) {
+      if (is_dir($file_path)) {
+	if (!$this->url) die("Can not delete home document");
+	$ff = glob($file_path.'/*');
+	if (count($ff)) die('Folder: "'.$this->url.'" not empty!');
+	if (rmdir($file_path) === false) {
+	  die("Error rmdir($file_path)");
+	}
+	header('Location: '.$this->mkUrl(dirname($this->url)));
+      } else {
+	if (unlink($file_path) === false) {
+	  die("Error unlink($file_path)");
+	}
+	header('Location: '.$this->mkUrl(dirname($this->url)));
+      }
+      exit;
+    }
+
+    protected function rename($file_path,$newname) {
+      $newname = self::sanitize($newname);
+      if (strpos($newname,'/') === false) {
+	if (rename($file_path,dirname($file_path).'/'.$newname) == false) {
+	  die("Error rename($file_path,$newname)");
+	}
+	header('Location: '.$this->mkUrl(dirname($this->url),$newname));
+      } else {
+	if (rename($file_path,$this->config['file_path'].'/'.$newname) == false) {
+	  die("Error rename($file_path,$newname)");
+	}
+	header('Location: '.$this->mkUrl($newname));
+      }
+      exit;
     }
 
     /**
@@ -257,13 +377,124 @@ class NanoWiki
      *
      * @param string $path a glob path pattern
      */
-    protected function listFiles($path)
-    {
-        $this->file_list = $this->readDirectory($path);
-        natsort($this->file_list);
-        return $this->file_list;
-    }
+    protected function listFiles() {
+      if ($this->context['lstmode'] == 'local') {
+	$url = $this->url;
+	$dpath = $this->config['file_path'].'/'.$url;
+	if (!is_dir($dpath)) {
+	  $url = dirname($url);
+	  $dpath = dirname($dpath);
+	}
+	//~ echo "url: $url<br>";
+	//~ echo "dpath: $dpath<br>";
 
+	$this->file_list = [];
+
+	$dp = opendir($dpath);
+	if ($url != '') $url .= '/';
+	if ($dp !== false) {
+	  while (false !== ($fn = readdir($dp))) {
+	    if ($fn[0] == '.' || $fn == $this->config['default_doc']) continue;
+	    $this->file_list[] = $url . $fn;
+	  }
+	  closedir($dp);
+	}
+      } else {
+	$path = $this->config['file_path'];
+	$this->file_list = $this->readDirectory($path);
+      }
+
+      natsort($this->file_list);
+
+      if (!empty($this->context['q'])) {
+	$q = $this->context['q'];
+	$res = [];
+	if ($this->context['lstmode'] == 'local') {
+	  $this->file_list[] = $this->url;
+	}
+	foreach ($this->file_list as $ff) {
+	  $fp = $this->getFilePath($ff);
+	  if (file_exists($fp.'/'.$this->config['default_doc'])) {
+	    $fp = $fp.'/'.$this->config['default_doc'];
+	  }
+	  if (!file_exists($fp)) continue;
+
+	  $ext = pathinfo($fp)['extension'] ?? '';
+	  if (isset($this->handlers[$ext])) {
+	    $text = $this->fileGetContents($fp);
+	    if (preg_match('/'.$q.'/i',$text)) {
+	      $res[] = $ff;
+	    }
+	  }
+	  $this->file_list = $res;
+	}
+      }
+    }
+    /**
+     * Generate bread-crumbs
+     */
+    protected function bakeCrumbs() {
+      if ($this->context['lstmode'] == 'local') {
+	$crumbs = [
+	  [
+	    'href' => $this->mkUrl(),
+	    'title' => 'Home page',
+	    'text' => ' &#x2302; ',
+	  ],
+	];
+	if ($this->url) {
+	  $parts = explode('/', $this->url);
+	  for ($i = 0; $i < count($parts) ; ++$i) {
+
+	    $urlpath = implode('/',array_slice($parts,0,$i+1));
+	    $crumbs[] = [
+	      'href' => $this->mkUrl($urlpath),
+	      'title' => $urlpath,
+	      'text' => $parts[$i],
+	      'prefix' => ' : ',
+	    ];
+	  }
+	}
+
+	$crumbs[] = [
+	    'href' => $this->mkUrl($this->url).'?'.http_build_query([
+		  'sw_lstmode' => 'global'
+	      ]),
+	    'title' => 'Switch to global context',
+	    'text' => ' &#x1F310; ',
+	    'class' => 'dropdown-topbar-right',
+
+	];
+      } else {
+        $crumbs = [
+	  [
+	    'href' => $this->mkUrl(),
+	    'title' => 'Home page',
+	    'text' => ' &#x2302; ',
+	  ],
+	  [
+	    'href' => $this->mkUrl($this->url).'?'.http_build_query([
+		  'sw_lstmode' => 'local'
+	      ]),
+	    'title' => 'Switch to local context',
+	    'text' => ' &#x25CE; ',
+	    'class' => 'dropdown-topbar-right',
+	  ]
+	];
+      }
+      $this->bread_crumbs = $crumbs;
+    }
+    public function serveCrumb($crumb) {
+      $txt = ($crumb['prefix'] ?? '') . '<a';
+      foreach ($crumb as $k=>$v) {
+	if ($k == 'text' || $k == 'prefix') continue;
+	$txt .= ' '.$k.'="'.$v.'"';
+	if ($k == 'title' && !isset($crumb['alt'])) $txt .= ' alt="'.$v.'"';
+	if ($k == 'alt' && !isset($crumb['title'])) $txt .= ' title="'.$v.'"';
+      }
+      $txt .= '>'.($crumb['text'] ?? ' ').'</a>';
+      return $txt;
+    }
     /**
      * Returns a list of all files recursive
      *
@@ -461,21 +692,24 @@ class NanoWiki
       if (basename($file_path) == $this->config['default_doc'])
 	$file_path = dirname($file_path);
 
-      if (file_exists($file_path.'/'.$fname)) die("$fname: File already exists");
+      $pi = pathinfo($file_path);
+      $dir_path = $pi['dirname'].'/'.$pi['filename'];
+
+      if (file_exists($dir_path.'/'.$fname)) die("$fname: File already exists");
 
       echo '<pre>';
       echo "url: $this->url\n";
-      echo "file_path: $file_path\n";
+      echo "dir_path: $file_path\n";
       echo "fname: $fname\n";
 
       print_r($_POST);
       print_r($_FILES);
 
-      if (!is_dir($file_path)) {
-	if (mkdir(dirname($file_path),0777,true) === false)
-	  die("Unable to create: $file_path");
+      if (!is_dir($dir_path)) {
+	if (mkdir($dir_path,0777,true) === false)
+	  die("Unable to mkdir: $dir_path");
       }
-      if (!move_uploaded_file($fd['tmp_name'],$file_path.'/'.$fname))
+      if (!move_uploaded_file($fd['tmp_name'],$dir_path.'/'.$fname))
 	die("Error saving uploaded file");
 
       header('Location: '.$_SERVER['REQUEST_URI']);
@@ -653,6 +887,83 @@ class NanoWiki
       $css = $theme_dir.'/'.$this->config['theme'].'.css';
       if (!file_exists($css)) return;
       return '<link rel="stylesheet" href="'.$this->mkUrl($css).'">'.PHP_EOL;
+    }
+    /*
+     * Hanlde toolbar customizations
+     */
+    protected function loadTools() {
+      $PicoWiki = $this;
+      $tools = [];
+      $tools[] = [
+	  'tag' => 'a',
+	  'text' => '<img src="'.$PicoWiki->mkUrl('static/nanowiki-favicon.png').'" height=24 width=24>',
+	  'target' => '_blank',
+	  'title' => 'NanoWiki github page',
+	  'href' => $PicoWiki->config['nanowiki_url']
+	];
+      $tools[] = [ 'include' => 'backend/templates/_filelist.html' ];
+      $tools[] = [ 'include' => 'backend/templates/_filetools.html' ];
+
+      $fp = $this->getFilePath($this->url);
+      if ($this->isWritable($fp)) {
+	$tools[] = [
+	    'tag' => 'a',
+	    'href' => 'javascript:;',
+	    'id' => 'tb-tools-show-source',
+	    'class' => 'topbar-default-hidden topbar-right',
+	    'title' => 'Show source',
+	    'text' => ' &#x1F6C8; source',
+	  ];
+	$tools[] = [
+	    'tag' => 'a',
+	    'href' => 'javascript:;',
+	    'id' => 'tb-tools-show-content',
+	    'class' => 'topbar-default-hidden topbar-right',
+	    'title' => 'Display content',
+	    'text' => '&#x1F441; view',
+	  ];
+	$tools[] = [
+	    'tag' => 'a',
+	    'href' => 'javascript:;',
+	    'id' => 'tb-tools-save',
+	    'class' => 'topbar-default-hidden topbar-right',
+	    'title' => 'Save document',
+	    'text' => '&#x1F4BE; save',
+	  ];
+      }
+      $this->toolbar = $tools;
+    }
+    public function renderTools($tools = null) {
+      if ($tools == null) $tools = $this->toolbar;
+
+      $PicoWiki = $this;
+      $ret = '';
+      foreach ($tools as $tbi) {
+	//~ echo '<pre>'.print_r($tbi,true).'</pre>';
+	if (isset($tbi['include'])) {
+	  ob_start();
+	  include($tbi['include']);
+	  $ret .= ob_get_clean();
+	} elseif (isset($tbi['tag'])) {
+	  $ret .= '<'. $tbi['tag'];
+	  foreach ($tbi as $k=>$v) {
+	    if ($k == 'text') continue;
+	    $ret .= ' ' . $k . '="'.$v.'"';
+	    if ($k == 'title' && empty($tbi['alt'])) $ret .= ' alt="'.$v.'"';
+	  }
+	  $ret .= '>';
+	  if (isset($tbi['text'])) {
+	    if (is_array($tbi['text'])) {
+	      $ret .= $this->renderTools($tbi['text']);
+	    } else {
+	      $ret .= $tbi['text'];
+	    }
+	  }
+	  $ret .= '</'.$tbi['tag'].'>'.PHP_EOL;
+	}
+      }
+      //~ echo '<pre>'.htmlspecialchars($ret).'</pre>';
+      return $ret;
     }
 }
 

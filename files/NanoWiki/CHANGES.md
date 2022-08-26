@@ -3,6 +3,27 @@ title: CHANGES
 ---
 [toc]
 
+# 2.2.0
+
+- configurable umask
+- preliminary reverse-proxy support
+- in cookies debug flag
+- bugfix: read_only == not-auth check
+- folder view now has link to document view.
+- config unix_eol.  Force UNIX EOL in files.
+
+# 2.1.0
+
+
+- Added toolbars
+- Removed MirrorMark
+- Additional minor tweaks and doc updates
+- Search functionality
+- navigation improvements with file list modes: global (all files)
+      or local (only current directory)
+- cookie support to let the user remember how they were doing things
+
+
 # 2.0.0
 
 - Changed from PicoWiki to NanoWiki.
@@ -19,10 +40,4 @@ title: CHANGES
 - All plugins re-worked
 - theme support
 
-***
-
-- navigation improvements with file list modes: global (all files)
-  or local (only current directory)
-- cookie support to let the user remember how they were doing things
-- search filenames and full text searches
 

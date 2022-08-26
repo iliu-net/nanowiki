@@ -2,7 +2,6 @@
 title: Backlog
 tags: development, php
 ---
-
 [toc]
 
 
@@ -68,4 +67,12 @@ tags: development, php
 - markdown media handler
   - if yaml contains enable-php true
   - run PHP code
-- Remove mirrormark => codemirror only
+
+# todo
+
+- Fix move/rename logic?
+- Create a new file doesn't path very well.
+- local links instead of absolute links
+- dev env
+  - container deploy: set permissions right
+  - move to nd2, and export files and mount on nd3

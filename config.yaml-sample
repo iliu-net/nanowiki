@@ -10,4 +10,5 @@
 # cookie_id:	NanoWiki
 # cookie_age:	2592000
 # codemirror:	https://cdn.jsdelivr.net/npm/codemirror@5.65.4/
-
+# proxy-ips:	list of allowed reverse proxies
+# umask:	0022

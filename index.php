@@ -12,10 +12,14 @@ $config = [
   'cookie_id'		=> 'NanoWiki',
   'cookie_age'		=> 86400 * 30,
   'codemirror'		=> 'https://cdn.jsdelivr.net/npm/codemirror@5.65.4/',
+  'proxy-ips'		=> null,	// list of IP addresses of trusted reverse proxies
+  'unix_eol'		=> true,	// Convert payload EOL to UNIX style format
+  // 'umask'		=> 0022,	// optional umask
 ];
 if (file_exists(__DIR__.'/config.yaml')) {
   $config = array_merge($config, yaml_parse_file(__DIR__.'/config.yaml'));
 }
+if (isset($config['umask'])) umask($config['umask']);
 
 class NanoWiki
 {
@@ -32,6 +36,7 @@ class NanoWiki
     public $meta = [];	// current doc meta data
     public $https = false;
     public $toolbar = []; // Toolbar items
+    public $env = [];		// HTTP environment
 
     /**
      * Converts a long string of bytes into a readable format e.g KB, MB, GB, TB, YB
@@ -156,8 +161,25 @@ class NanoWiki
     public function __construct($config) {
       $this->event('init', $this);
       $this->config = $config;
+
+      $this->env['scheme'] = $_SERVER['REQUEST_SCHEME'] ?? '*INTERNAL*';
+      $this->env['remote_addr'] = $_SERVER['REMOTE_ADDR'] ?? '*LOCAL*';
+      $this->env['host'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+      if (!empty($this->config['proxy-ips'])) {
+	$rp = $this->config['proxy-ips'];
+	if (!is_array($rp)) $rp = preg_split('/\s*,\s*/',trim($rp));
+	if (in_array($_SERVER['REMOTE_ADDR'],$rp)) {
+	  // IP is a registered reverse proxy....
+	  $this->env['scheme'] = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? $this->env['scheme'];
+	  $this->env['remote_addr'] = $_SERVER['HTTP_X_REAL_IP'] ?? $this->env['remote_addr'];
+	  $this->env['host'] = $_SERVER['HTTP_X_FORWARDED_HOST'] ?? $this->env['host'];
+	}
+      }
+      if ($this->env['scheme'] == 'https') $this->https = true;
+
       if (!$this->config['app_url']) {
-	$this->config['app_url'] = '//'.$_SERVER['HTTP_HOST'].str_replace('index.php', '', $_SERVER['SCRIPT_NAME']);
+	$this->config['app_url'] = '//'.$this->env['host'].str_replace('index.php', '', $_SERVER['SCRIPT_NAME']);
       }
       if (empty($this->config['app_dir'])) $this->config['app_dir'] = __DIR__;
       $this->event('config_loaded', $this);
@@ -172,7 +194,7 @@ class NanoWiki
       if (empty($this->config['read_only'])) {
 	$wr = true;
       } else {
-	if ($this->config['read_only'] == 'not-auth') {
+	if (!is_bool($this->config['read_only']) && $this->config['read_only'] == 'not-auth') {
 	  # TODO: check how auth user is received
 	  # $_SERVER['PHP_AUTH_USER'] or REMOTE_USER
 	  $wr = true;
@@ -300,6 +322,20 @@ class NanoWiki
 	}
       }
 
+      if (empty($context['debug'])) $context['debug'] = false;
+      if (isset($_GET['debug'])) {
+	if (!$context['debug']) {
+	  $context['debug'] = true;
+	  $set_cookie = true;
+	}
+      }
+      if (isset($_GET['nodebug'])) {
+	if ($context['debug']) {
+	  $context['debug'] = false;
+	  $set_cookie = true;
+	}
+      }
+
       if ($set_cookie || time()-$context['timestamp'] > $this->config['cookie_age']/2) {
 	$context['timestamp'] = time();
 	setcookie($cookie_name,http_build_query($context), [
@@ -332,18 +368,37 @@ class NanoWiki
     }
 
     protected function rename($file_path,$newname) {
-      $newname = self::sanitize($newname);
+      //~ echo "NewName: $newname<br>";
+      $q = $newname[0] == '/' ? '/' : '';
+      $newname = $q.self::sanitize($newname);
+
+      //~ echo "Orig: $file_path<br>";
+      //~ echo "NewName: $newname<br>";
+      //~ echo "<pre>";
+      //~ echo "STRPOS: ";
+      //~ $v = strpos($newname,'/');
+      //~ var_dump($v);
+      //~ echo "\n</pre>";
+
       if (strpos($newname,'/') === false) {
-	if (rename($file_path,dirname($file_path).'/'.$newname) == false) {
-	  die("Error rename($file_path,$newname)");
-	}
-	header('Location: '.$this->mkUrl(dirname($this->url),$newname));
+	$target = dirname($file_path).'/'.$newname;
       } else {
-	if (rename($file_path,$this->config['file_path'].'/'.$newname) == false) {
-	  die("Error rename($file_path,$newname)");
-	}
-	header('Location: '.$this->mkUrl($newname));
+	$target = $this->config['file_path'].'/'.$newname;
       }
+
+      //~ echo "target: $target<br>";
+      if ($file_path == $this->config['file_path']) {
+	die("Cannot rename root directory");
+      }
+
+      if (rename($file_path,$target) == false) {
+	die("Error rename($file_path,$target)");
+      }
+
+      $location = str_replace($this->config['file_path'].'/', '', $target);
+      echo('Location: '. $location.'<br>');
+      Header('Location: '. $this->mkUrl($location));
+      echo '<br>';
       exit;
     }
 
@@ -535,12 +590,17 @@ class NanoWiki
 
     protected function viewDir($file_path) {
       $PicoWiki = $this;
+      $doc_view = false;
 
       $lst = [];
       $dp = @opendir($file_path);
       if ($dp !== false) {
 	while (false !== ($fn = readdir($dp))) {
-	  if ($fn[0] == '.' || $fn == $PicoWiki->config['default_doc']) continue;
+	  if ($fn == $PicoWiki->config['default_doc']) {
+	    $doc_view = true;
+	    continue;
+	  }
+	  if ($fn[0] == '.') continue;
 	  $lst[] = $fn;
 	}
 	closedir($dp);
@@ -721,7 +781,11 @@ class NanoWiki
       echo '<pre>';
 
       if (empty($_POST['payload'])) die("No payload!");
-      $payload = $_POST['payload'];
+      if ($this->config['unix_eol']) {
+	$payload = str_replace("\r", '', $_POST['payload']);
+      } else {
+	$payload = $_POST['payload'];
+      }
       $payload = $this->event('payload_pre', $payload);
 
       $ext = pathinfo($file_path)['extension'] ?? '';

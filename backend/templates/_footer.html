@@ -19,7 +19,9 @@
     Copyright &copy; <?=$PicoWiki->meta['year']?> <?=$PicoWiki->config['copyright']?> <br/>
     All rights reserved<br/>
 </small>
-<?php if (!empty($_GET['debug'])) { ?>
+
+
+<?php if ($PicoWiki->context['debug']) { ?>
 URL: <?= $PicoWiki->url ?><br/>
 <pre>
 Meta:
@@ -33,6 +35,10 @@ Server:
 
 Context:
 <?php print_r($PicoWiki->context); ?>
+
+Env:
+<?php print_r($PicoWiki->env); ?>
+
 </pre>
 <?php } ?>
 

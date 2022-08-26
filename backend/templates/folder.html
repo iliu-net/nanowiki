@@ -38,8 +38,14 @@
       }
     ?>
 
-    <h1></h1>
-    <p>Go <a href="<?= $PicoWiki->mkUrl()?>">Home</a></p>
+    <?php if ($doc_view) { ?>
+      <p>
+	Go <a href="<?= $PicoWiki->mkUrl()?>">Home</a> :
+	<a href="<?= $PicoWiki->mkUrl($PicoWiki->url) ?>">Document View</a>
+      </p>
+    <?php } else { ?>
+      <p>Go <a href="<?= $PicoWiki->mkUrl()?>">Home</a></p>
+    <?php } ?>
     <hr>
     <p>
       Do you want to upload a new file?

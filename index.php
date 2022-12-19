@@ -15,6 +15,7 @@ $config = [
   'proxy-ips'		=> null,	// list of IP addresses of trusted reverse proxies
   'unix_eol'		=> true,	// Convert payload EOL to UNIX style format
   // 'umask'		=> 0022,	// optional umask
+  'no_cache'		=> false,	// disable browser caches
 ];
 if (file_exists(__DIR__.'/config.yaml')) {
   $config = array_merge($config, yaml_parse_file(__DIR__.'/config.yaml'));
@@ -245,6 +246,12 @@ class NanoWiki
 
       $this->loadTools();
       $this->event('tools_loaded', $this);
+
+      if ($this->config['no_cache']) {
+	header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+	header("Cache-Control: post-check=0, pre-check=0", false);
+	header("Pragma: no-cache");
+      }
 
       $file_path = $this->getFilePath($this->url);
 

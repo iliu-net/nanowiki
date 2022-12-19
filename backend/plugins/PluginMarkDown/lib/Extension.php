@@ -4,7 +4,7 @@ class ParsedownExtension extends ParsedownToC {
 
   static $graphviz_modes = [ 'dot', 'neato', 'fdp', 'sfdp', 'twopi', 'circo' ];
   public $headown = 0;
-  public $gfx_fmt = 'svg'; # Use: 'svg' or 'png'
+  public $gfx_fmt = 'png'; # Use: 'svg' or 'png'
 
   function __construct() {
     $this->InlineTypes['^'][] = 'Superscript';
@@ -17,6 +17,8 @@ class ParsedownExtension extends ParsedownToC {
     $this->inlineMarkerList .= '=';
     $this->InlineTypes['\\'][] = 'ForcedBr';
     $this->inlineMarkerList .= '\\';
+    $this->InlineTypes['?'][] = 'MarkedText';
+    $this->inlineMarkerList .= '?';
   }
   protected function inlineForcedBr($excerpt) {
     //~ echo '<pre>'.htmlspecialchars(print_r($excerpt,true)).'</pre>';
@@ -26,6 +28,18 @@ class ParsedownExtension extends ParsedownToC {
 	  'extent' => strlen($matches[0]),
 	  'element' => [
 	      'name' => 'br',
+	  ],
+      ];
+    }
+  }
+  protected function inlineMarkedText($excerpt) {
+    if (preg_match('/(?:\?\?(?!\?)([^\? ]*)\?\?(?!\?))/', $excerpt['text'], $matches)) {
+      return [
+	  'extent' => strlen($matches[0]),
+	  'element' => [
+	      'name' => 'mark',
+	      'text' => $matches[1],
+	      'function' => 'lineElements',
 	  ],
       ];
     }

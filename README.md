@@ -55,7 +55,7 @@ plugins at all.
 - `write_access_error`: handles when the user wants to write to a write-protected URL
 - `read_access_error`: handles when the user wants to access to a read-protected URL
 - `check_readable`: check if user has read access
-- `check_writeable`: check if user has read access
+- `check_writeable`: check if user has write access
 - `payload_pre`: pre-process payload before saving
 - `meta_write_before`: modify meta data before payload generation
 - `payload_post`: post-process payload before saving
@@ -65,7 +65,7 @@ plugins at all.
 # Requirements
 
 - PHP 7.4.0 or above
-- svgbob : line-art
+- [svgbob](https://github.com/ivanceras/svgbob) : line-art
 - graphviz : code diag
 
 ## PHP Extensions

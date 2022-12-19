@@ -8,5 +8,19 @@
 <div>
 <h1><?= htmlspecialchars($PicoWiki->meta['title']) ?></h1>
 </div>
+<?php
+  if (isset($PicoWiki->meta['file-path']) && basename($PicoWiki->meta['file-path']) == $PicoWiki->config['default_doc']) {
+    if (isset($_GET['tools']) && $_GET['tools']) {
+      echo '<a href="'.$PicoWiki->mkUrl($PicoWiki->url).'">';
+      echo 'Switch to Default View';
+      echo '</a>';
+    } else {
+      echo '<a href="'.$PicoWiki->mkUrl($PicoWiki->url).'?tools=1">';
+      echo 'Switch to Folder View';
+      echo '</a>';
+    }
+  }
+?>
 <hr/>
-<?=$PicoWiki->jsCode('static/topbar.js')?>
+
+<?=$PicoWiki->jsCode('static/topbar.js?x=15')?>

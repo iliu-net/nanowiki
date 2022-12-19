@@ -3,6 +3,13 @@ title: CHANGES
 ---
 [toc]
 
+# 2.3.0
+
+- added headers to disable browser caching
+- fixed close dropdowns when clicking outside
+- added ??mark?? (Double question mark syntax) to markdown.
+- Show folder/doc view switch on header
+
 # 2.2.0
 
 - configurable umask

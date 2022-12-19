@@ -28,8 +28,14 @@ function tb_enable_dropdown(tid, did) {
     return true;
   }
 
-  tb.onclick = function() {
+  tb.onclick = function(e) {
     dl.classList.toggle("dropdown-show");
+    e.stopPropagation();
+    //~ console.log("TB ON Click");
+  }
+  dl.onclick = function(e) {
+    e.stopPropagation();
+    //~ console.log("Dropdown Click");
   }
 }
 tb_enable_dropdown("tb-nav-file-toggle", "tb-nav-file-list");
@@ -37,13 +43,16 @@ tb_enable_dropdown("tb-nav-tools-toggle", "tb-nav-tools-dlg");
 
 // Close the dropdown menu if the user clicks outside of it
 window.onclick = function(event) {
-  if (!event.target.matches('.dropbtn')) {
+  //~ console.log("WINDOW Click 42");
+  if (!event.target.matches('.dropbtn') && !event.target.matches('.dropdown-content')) {
+    //~ console.log("WINDOW Click 44");
     var dropdowns = document.getElementsByClassName("dropdown-content");
     var i;
     for (i = 0; i < dropdowns.length; i++) {
+      //~ console.log("WINDOW Click 48 and i="+i);
       var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
+      if (openDropdown.classList.contains('dropdown-show')) {
+        openDropdown.classList.remove('dropdown-show');
       }
     }
   }

@@ -12,3 +12,4 @@
 # codemirror:	https://cdn.jsdelivr.net/npm/codemirror@5.65.4/
 # proxy-ips:	list of allowed reverse proxies
 # umask:	0022
+# no_cache: true

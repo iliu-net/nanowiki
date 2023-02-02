@@ -220,7 +220,7 @@ directory with the following conventions.
 
 For files in the main `static` directory place them in one of these:
 
-- `>theme-dir>`/`<js|css>`/`<file>`
+- `<theme-dir>`/`<js|css>`/`<file>`
 - `<theme-dir>`/`<file>`
 
 For example, `style.css` in `dark` theme:

@@ -4,17 +4,51 @@ tags: development, php
 ---
 [toc]
 
+Rename as NanoWiki was already used:
+
+- NacoWiki
+- ***
+- Alecy
+- Lalex
+- Niki or NikiWiki
+- PinoWiki
+- Piano
+- Naniki
+
+
 ***
 
+- [x] close pop-up when other pop-up opens
+- re-structure code
+
+***
+
+- re-vamp UI
+  - link to copy URL (local/global) to clipboard (for inserting into
+    articles)
+  - TOOLBAR
+    - home, folder, search, filesmenu, toolmenu | save,view/source
 - Fix move/rename logic?
 - Create a new file doesn't path very well.
 - local links instead of absolute links
 - WikiLinks if no `/` but a `!` should search the name all
   over the place.
 - Search : checkbox for global search and local search
-- Search: multiple matches in a single file causes the file to listed multiple times
 - First search should display a virtual search view.
 - sort - alpha,latest file
+- Switch to source should hit the server.
+  - preview without saving article
+
+# re-vamp FILES pop-up UI
+
+- treat it as a small web applet.
+- we send the full document list
+- java script will:
+  - render the list
+    - provide a link to copy URL to clipboard for inserting into article
+    - the local/global view switch
+    - display as a tree view
+    - do the search thing
 
 # Tag Navigation
 
@@ -33,6 +67,11 @@ tags: development, php
 
 - blockdiag
   - http://blockdiag.com/en/
+
+# Other diag integrations
+
+- https://github.com/cidrblock/drawthe.net
+- https://github.com/jgraph/drawio
 
 # new media types
 

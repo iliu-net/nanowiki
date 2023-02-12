@@ -4,21 +4,33 @@
   if (isset($PicoWiki->meta['file-path']) && basename($PicoWiki->meta['file-path']) == $PicoWiki->config['default_doc']) {
     if (isset($_GET['tools']) && $_GET['tools']) {
       echo '<a href="'.$PicoWiki->mkUrl($PicoWiki->url).'">';
-      echo 'Switch to Default View';
+      echo 'Switch to Document View';
       echo '</a>';
     } else {
       echo '<a href="'.$PicoWiki->mkUrl($PicoWiki->url).'?tools=1">';
       echo 'Switch to Folder View';
       echo '</a>';
     }
+  } else {
+    if (!is_dir($PicoWiki->config['file_path'].'/'.$PicoWiki->url)) {
+      $d = dirname($PicoWiki->url);
+      $tools = file_exists($PicoWiki->config['file_path'].'/'.$d.'/'.$PicoWiki->config['default_doc']) ?
+		'?tools=1' : '';
+      echo '<a href="'.$PicoWiki->mkUrl($d).$tools.'">';
+      echo 'View Folder';
+      echo '</a>';
+    }
   }
 ?>
 <hr/>
 <small>
-  <?= $PicoWiki->config['app_name'] ?>: <?= NanoWiki::VERSION(); ?><br/>
+  <a href="https://github.com/iliu-net/nanowiki">
+  <?= $PicoWiki->config['app_name'] ?>: <?= NanoWiki::VERSION(); ?>
+  </a><br/>
     Copyright &copy; <?=$PicoWiki->meta['year']?> <?=$PicoWiki->config['copyright']?> <br/>
     All rights reserved<br/>
 </small>
+
 
 
 <?php if ($PicoWiki->context['debug']) { ?>

@@ -33,7 +33,7 @@ class ParsedownExtension extends ParsedownToC {
     }
   }
   protected function inlineMarkedText($excerpt) {
-    if (preg_match('/(?:\?\?(?!\?)([^\? ]*)\?\?(?!\?))/', $excerpt['text'], $matches)) {
+    if (preg_match('/(?:\?\?(?!\?)([^\?]*)\?\?(?!\?))/', $excerpt['text'], $matches)) {
       return [
 	  'extent' => strlen($matches[0]),
 	  'element' => [

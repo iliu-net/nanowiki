@@ -3,6 +3,14 @@ title: CHANGES
 ---
 [toc]
 
+# 2.3.1
+
+- added a link to view folder contents
+- fixed bug on search
+- close dropdowns on blur
+- tweaked markup
+
+
 # 2.3.0
 
 - added headers to disable browser caching

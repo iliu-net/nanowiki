@@ -472,7 +472,7 @@ class NanoWiki
 	$q = $this->context['q'];
 	$res = [];
 	if ($this->context['lstmode'] == 'local') {
-	  $this->file_list[] = $this->url;
+	  if (file_exists($dpath.'/'.$this->config['default_doc'])) $this->file_list[] = $url . '/' . $this->config['default_doc'];
 	}
 	foreach ($this->file_list as $ff) {
 	  $fp = $this->getFilePath($ff);
@@ -488,8 +488,8 @@ class NanoWiki
 	      $res[] = $ff;
 	    }
 	  }
-	  $this->file_list = $res;
 	}
+	$this->file_list = $res;
       }
     }
     /**

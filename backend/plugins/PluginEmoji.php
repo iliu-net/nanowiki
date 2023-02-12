@@ -7,6 +7,7 @@
  */
 
 class PluginEmoji {
+        /* ADD WHAT YOU LIKE - https://gist.github.com/hkan/264423ab0ee720efb55e05a0f5f90887 */
   static $version = '1.0.0';
   static function load( $PicoWiki ) {
     $PicoWiki->event('view_after', NULL, function($html) use ($PicoWiki) {
@@ -28,8 +29,11 @@ class PluginEmoji {
         ':star:'     => '⭐',
 	':tent:'     => '⛺',
 	':joy:'      => '🤣',
+	':x:'        => '❎',
+	':v:'        => '✅',
+	':check_mark:' => '&#x2714;',
+	':cross_mark:' => '&#x274c;',
         '<3'         => '❤', /* ❤️ 💗 */
-        /* ADD WHAT YOU LIKE - https://gist.github.com/hkan/264423ab0ee720efb55e05a0f5f90887 */
         ';-)'        => '😉',
         ':-)'        => '🙂',
         ':-|'        => '😐',

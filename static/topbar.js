@@ -29,6 +29,18 @@ function tb_enable_dropdown(tid, did) {
   }
 
   tb.onclick = function(e) {
+    //~ console.log("WINDOW Click 44");
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      //~ console.log("WINDOW Click 48 and i="+i);
+      var openDropdown = dropdowns[i];
+      if (openDropdown.id == dl.id) continue;
+      if (openDropdown.classList.contains('dropdown-show')) {
+        openDropdown.classList.remove('dropdown-show');
+      }
+    }
+
     dl.classList.toggle("dropdown-show");
     e.stopPropagation();
     //~ console.log("TB ON Click");
@@ -57,6 +69,21 @@ window.onclick = function(event) {
     }
   }
 }
+window.onblur = function() {
+    //~ console.log("WINDOW Click 44");
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      //~ console.log("WINDOW Click 48 and i="+i);
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('dropdown-show')) {
+        openDropdown.classList.remove('dropdown-show');
+      }
+    }
+}
+
+
+
 
 function isHidden(el) {
   var style = window.getComputedStyle(el);
